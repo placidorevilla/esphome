@@ -30,6 +30,8 @@ class E131AddressableLightEffect : public light::AddressableLightEffect {
   void set_first_universe(int universe) { this->first_universe_ = universe; }
   void set_channels(E131LightChannels channels) { this->channels_ = channels; }
   void set_e131(E131Component *e131) { this->e131_ = e131; }
+  void set_size(int size) { this->size_ = size; }
+  void set_repeat(bool repeat) { this->repeat_ = repeat; }
 
  protected:
   bool process_(int universe, const E131Packet &packet);
@@ -38,6 +40,8 @@ class E131AddressableLightEffect : public light::AddressableLightEffect {
   int last_universe_{0};
   E131LightChannels channels_{E131_RGB};
   E131Component *e131_{nullptr};
+  int size_{0};
+  bool repeat_{true};
 
   friend class E131Component;
 };

@@ -23,7 +23,10 @@ int E131AddressableLightEffect::get_last_universe() const { return first_univers
 int E131AddressableLightEffect::get_universe_count() const {
   // Round up to lights_per_universe
   auto lights = get_lights_per_universe();
-  return (get_addressable_()->size() + lights - 1) / lights;
+  int size = get_addressable_()->size();
+  if (size_ && size_ < size)
+    size = size_;
+  return (size + lights - 1) / lights;
 }
 
 void E131AddressableLightEffect::start() {
@@ -55,8 +58,11 @@ bool E131AddressableLightEffect::process_(int universe, const E131Packet &packet
 
   int output_offset = (universe - first_universe_) * get_lights_per_universe();
   // limit amount of lights per universe and received
+  int size = it->size();
+  if (size_ && size_ < size)
+    size = size_;
   int output_end =
-      std::min(it->size(), std::min(output_offset + get_lights_per_universe(), output_offset + packet.count - 1));
+      std::min(size, std::min(output_offset + get_lights_per_universe(), output_offset + ((packet.count - 1) / channels_)));
   auto *input_data = packet.values + 1;
 
   ESP_LOGV(TAG, "Applying data for '%s' on %d universe, for %d-%d.", get_name().c_str(), universe, output_offset,
@@ -65,23 +71,32 @@ bool E131AddressableLightEffect::process_(int universe, const E131Packet &packet
   switch (channels_) {
     case E131_MONO:
       for (; output_offset < output_end; output_offset++, input_data++) {
-        auto output = (*it)[output_offset];
-        output.set(Color(input_data[0], input_data[0], input_data[0], input_data[0]));
+        int real_offset = output_offset;
+        do {
+          auto output = (*it)[real_offset];
+          output.set(Color(input_data[0], input_data[0], input_data[0], input_data[0]));
+        } while (repeat_ && size_ && (real_offset += size_) < it->size());
       }
       break;
 
     case E131_RGB:
       for (; output_offset < output_end; output_offset++, input_data += 3) {
-        auto output = (*it)[output_offset];
-        output.set(
-            Color(input_data[0], input_data[1], input_data[2], (input_data[0] + input_data[1] + input_data[2]) / 3));
+        int real_offset = output_offset;
+        do {
+          auto output = (*it)[real_offset];
+          output.set(
+              Color(input_data[0], input_data[1], input_data[2], (input_data[0] + input_data[1] + input_data[2]) / 3));
+        } while (repeat_ && size_ && (real_offset += size_) < it->size());
       }
       break;
 
     case E131_RGBW:
       for (; output_offset < output_end; output_offset++, input_data += 4) {
-        auto output = (*it)[output_offset];
-        output.set(Color(input_data[0], input_data[1], input_data[2], input_data[3]));
+        int real_offset = output_offset;
+        do {
+          auto output = (*it)[real_offset];
+          output.set(Color(input_data[0], input_data[1], input_data[2], input_data[3]));
+        } while (repeat_ && size_ && (real_offset += size_) < it->size());
       }
       break;
   }

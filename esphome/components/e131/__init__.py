@@ -2,7 +2,14 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components.light.types import AddressableLightEffect
 from esphome.components.light.effects import register_addressable_effect
-from esphome.const import CONF_ID, CONF_NAME, CONF_METHOD, CONF_CHANNELS
+from esphome.const import (
+    CONF_ID,
+    CONF_NAME,
+    CONF_METHOD,
+    CONF_CHANNELS,
+    CONF_SIZE,
+    CONF_REPEAT,
+)
 
 DEPENDENCIES = ["network"]
 
@@ -50,6 +57,8 @@ async def to_code(config):
         cv.GenerateID(CONF_E131_ID): cv.use_id(E131Component),
         cv.Required(CONF_UNIVERSE): cv.int_range(min=1, max=512),
         cv.Optional(CONF_CHANNELS, default="RGB"): cv.one_of(*CHANNELS, upper=True),
+        cv.Optional(CONF_SIZE, default=0): cv.int_,
+        cv.Optional(CONF_REPEAT, default=True): cv.boolean,
     },
 )
 async def e131_light_effect_to_code(config, effect_id):
@@ -59,4 +68,6 @@ async def e131_light_effect_to_code(config, effect_id):
     cg.add(effect.set_first_universe(config[CONF_UNIVERSE]))
     cg.add(effect.set_channels(CHANNELS[config[CONF_CHANNELS]]))
     cg.add(effect.set_e131(parent))
+    cg.add(effect.set_size(config[CONF_SIZE]))
+    cg.add(effect.set_repeat(config[CONF_REPEAT]))
     return effect
