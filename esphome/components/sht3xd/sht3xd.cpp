@@ -19,7 +19,7 @@ void SHT3XDComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up SHT3xD...");
   uint16_t raw_serial_number[2];
   if (!this->get_register(SHT3XD_COMMAND_READ_SERIAL_NUMBER, raw_serial_number, 2)) {
-    this->mark_failed();
+    ESP_LOGE(TAG, "Communication with SHT3xD failed!");
     return;
   }
   uint32_t serial_number = (uint32_t(raw_serial_number[0]) << 16) | uint32_t(raw_serial_number[1]);
