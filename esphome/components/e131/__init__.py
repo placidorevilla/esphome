@@ -11,6 +11,7 @@ from esphome.const import (
     CONF_REPEAT,
 )
 
+AUTO_LOAD = ["socket"]
 DEPENDENCIES = ["network"]
 
 e131_ns = cg.esphome_ns.namespace("e131")
@@ -30,16 +31,11 @@ CHANNELS = {
 CONF_UNIVERSE = "universe"
 CONF_E131_ID = "e131_id"
 
-CONFIG_SCHEMA = cv.All(
-    cv.Schema(
-        {
-            cv.GenerateID(): cv.declare_id(E131Component),
-            cv.Optional(CONF_METHOD, default="MULTICAST"): cv.one_of(
-                *METHODS, upper=True
-            ),
-        }
-    ),
-    cv.only_with_arduino,
+CONFIG_SCHEMA = cv.Schema(
+    {
+        cv.GenerateID(): cv.declare_id(E131Component),
+        cv.Optional(CONF_METHOD, default="MULTICAST"): cv.one_of(*METHODS, upper=True),
+    }
 )
 
 
